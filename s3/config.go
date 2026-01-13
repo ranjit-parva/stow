@@ -1,6 +1,7 @@
 package s3
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -159,12 +160,15 @@ func newS3Client(config stow.Config, region string) (client *s3.S3, endpoint str
 	endpoint, ok := config.Config(ConfigEndpoint)
 	if ok {
 		awsConfig.WithEndpoint(endpoint)
-		disableForcePathStyle, ok := config.Config(ConfigDisableForcePathStyle)
-		if ok && disableForcePathStyle == "true" {
-			awsConfig.WithS3ForcePathStyle(false)
-		} else {
-			awsConfig.WithS3ForcePathStyle(true)
-		}
+	}
+
+	disablePathStyle, _ := config.Config(ConfigDisableForcePathStyle)
+	if disablePathStyle == "true" {
+		fmt.Printf("Setting s3 force style true")
+		awsConfig.WithS3ForcePathStyle(false)
+	} else if endpoint != "" {
+		fmt.Printf("Setting s3 force style false")
+		awsConfig.WithS3ForcePathStyle(true)
 	}
 
 	disableSSL, ok := config.Config(ConfigDisableSSL)
